@@ -36,6 +36,7 @@ type ConfigsModel struct {
 	Profile            string
 	Verbose            string
 	EmulatorChannel    string
+	BootWaitTime       string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
@@ -54,6 +55,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Profile:            os.Getenv("profile"),
 		Verbose:            os.Getenv("verbose_mode"),
 		EmulatorChannel:    os.Getenv("emulator_channel"),
+		BootWaitTime:       os.Getenv("boot_wait_time"),
 	}
 }
 
@@ -71,6 +73,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Overwrite: %s", configs.Overwrite)
 	log.Printf("- CustomConfig:\n%s", configs.CustomConfig)
 	log.Printf("- EmulatorChannel: %s", configs.EmulatorChannel)
+	log.Printf("- BootWaitTime: %s", configs.BootWaitTime)
 }
 
 func (configs ConfigsModel) validate() error {
@@ -115,6 +118,9 @@ func (configs ConfigsModel) validate() error {
 	}
 	if err := input.ValidateWithOptions(configs.EmulatorChannel, "0", "1", "2", "3"); err != nil {
 		return fmt.Errorf("EmulatorChannel, %s", err)
+	}
+	if err := input.ValidateIfNotEmpty(configs.BootWaitTime); err != nil {
+		return fmt.Errorf("BootWaitTime, %s", err)
 	}
 	return nil
 }
@@ -409,8 +415,11 @@ func main() {
 				log.Printf("- Device with serial: %s started", serial)
 				break
 			}
-
-			bootWaitTime := time.Duration(300)
+			bootWaitTimeAsInt, err := strconv.Atoi(configs.BootWaitTime)
+			if err != nil {
+				failf("Invalid boot_wait_time value, error: %s", err)
+			}
+			bootWaitTime := time.Duration(bootWaitTimeAsInt)
 
 			if time.Now().After(deviceDetectionStarted.Add(bootWaitTime * time.Second)) {
 				failf("Failed to boot emulator device within %d seconds.", bootWaitTime)

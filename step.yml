@@ -235,6 +235,14 @@ inputs:
         - "1"
         - "2"
         - "3"
+  - boot_wait_time: 300
+    opts:
+      category: Customize
+      title: "Boot wait time"
+      summary: Select how much time to wait for the device to boot. Build will fail if this time is exceeded.
+      description: Select how much time to wait for the device to boot. Build will fail if this time is exceeded.
+      is_expand: true
+      is_required: true
 outputs:
   - BITRISE_EMULATOR_SERIAL:
     opts:
