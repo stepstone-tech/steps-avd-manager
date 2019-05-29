@@ -385,8 +385,12 @@ func main() {
 		osCommand := cmd.GetCmd()
 
 		if configs.Verbose == "true" {
-			osCommand.Stderr = os.Stderr
-			osCommand.Stdout = os.Stdout
+			outfile, err := os.Create("./out.txt")
+    		if err != nil {
+				failf("Couldn't create a log file")
+    		}
+    		defer outfile.Close()
+    		osCommand.Stdout = outfile
 		}
 
 		err = osCommand.Start()
